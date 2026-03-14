@@ -2,5 +2,10 @@
 name = "weirs"
 version = "0.1.0"
 edition = "2024"
+description = "A minimalist VPN client"
+keywords = ["vpn", "fortinet"]
+categories = ["network-programming", "command-line-utilities"]
+repository = "https://github.com/sauromates/weirs"
+license = "Apache-2.0"
 
 [dependencies]
