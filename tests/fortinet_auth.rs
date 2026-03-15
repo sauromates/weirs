@@ -1,4 +1,4 @@
-use weirs::proto::fortinet::auth::{Handler, password};
+use weirs::proto::fortinet::auth::password;
 
 #[tokio::test]
 #[ignore]

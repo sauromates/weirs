@@ -1,4 +1,5 @@
-use super::{Handler, extract_token};
+//! ## Fortinet password auth flow handler
+
 use crate::auth::{AuthError, Token};
 use reqwest::Client;
 
@@ -9,8 +10,10 @@ pub struct Authenticator<'a> {
     pub password: String,
 }
 
-impl Handler for Authenticator<'_> {
-    async fn handle(&self) -> Result<Token, AuthError> {
+impl Authenticator<'_> {
+    /// Orchestrates a sequence of HTTP requests to Fortinet server required
+    /// to obtain authentication cookie.
+    pub async fn handle(&self) -> Result<Token, AuthError> {
         let client = Client::builder()
             // TODO: consider certificate validation later
             .danger_accept_invalid_certs(true)
@@ -50,7 +53,7 @@ impl Handler for Authenticator<'_> {
                 url: format!("{}", super::CHECK_URL),
             })?;
 
-        extract_token(&response)
+        super::extract_token(&response)
     }
 }
 
@@ -59,7 +62,7 @@ mod tests {
     use crate::auth::AuthError;
     use crate::proto::fortinet::auth::{CHECK_URL, COOKIE, LOGIN_URL};
 
-    use super::{Authenticator, Handler};
+    use super::Authenticator;
     use wiremock::matchers::{method, path};
     use wiremock::{Mock, MockServer, ResponseTemplate};
 
@@ -177,7 +180,7 @@ mod tests {
     #[tokio::test]
     async fn test_network_error() {
         let auth = Authenticator {
-            host: "127.0.0.1:1",
+            host: "127.0.0.1:1", // Invalid host should trigger network error
             username: "testuser".into(),
             password: "testpassword".into(),
         };
