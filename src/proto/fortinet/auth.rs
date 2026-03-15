@@ -2,7 +2,7 @@
 //!
 //! Implements different authentication flows against FortiNet VPN servers.
 
-use crate::auth::{Auth, AuthError, Flow, Token};
+use crate::auth::{Auth, AuthError, ClientErrorKind, Flow, Token};
 use async_trait::async_trait;
 use reqwest::{Client, RequestBuilder, Response};
 
@@ -26,7 +26,7 @@ impl Auth for FortinetAuth {
             .danger_accept_invalid_certs(true)
             .cookie_store(true)
             .build()
-            .map_err(|e| AuthError::Client(e.to_string()))?;
+            .map_err(|e| AuthError::Client(ClientErrorKind::Generic(e.to_string())))?;
 
         match flow {
             Flow::Password { username, password } => {
@@ -92,7 +92,7 @@ fn extract_token(response: &reqwest::Response) -> Result<Token, AuthError> {
         .cookies()
         .find(|cookie| cookie.name() == COOKIE)
         .map(|cookie| Token(cookie.value().to_string()))
-        .ok_or(AuthError::Client(
+        .ok_or(AuthError::Client(ClientErrorKind::Generic(
             format!("{} is not found in response", COOKIE).into(),
-        ))
+        )))
 }

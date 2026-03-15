@@ -98,7 +98,7 @@ impl StepHandler for Authenticate<'_> {
 
 #[cfg(test)]
 mod tests {
-    use crate::auth::AuthError;
+    use crate::auth::{AuthError, ClientErrorKind};
     use crate::proto::fortinet::auth::{CHECK_URL, COOKIE, LOGIN_URL};
 
     use super::Authenticator;
@@ -114,7 +114,7 @@ mod tests {
         Client::builder()
             .cookie_store(true)
             .build()
-            .map_err(|e| AuthError::Client(e.to_string()))
+            .map_err(|e| AuthError::Client(ClientErrorKind::Generic(e.to_string())))
             .unwrap()
     }
 

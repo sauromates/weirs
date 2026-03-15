@@ -1,5 +1,8 @@
 use reqwest::Client;
-use weirs::{auth::AuthError, proto::fortinet::auth::password};
+use weirs::{
+    auth::{AuthError, ClientErrorKind},
+    proto::fortinet::auth::password,
+};
 
 #[tokio::test]
 #[ignore]
@@ -12,7 +15,7 @@ async fn test_fortinet_password_auth() {
         .danger_accept_invalid_certs(true)
         .cookie_store(true)
         .build()
-        .map_err(|e| AuthError::Client(e.to_string()))
+        .map_err(|e| AuthError::Client(ClientErrorKind::Generic(e.to_string())))
         .unwrap();
 
     let auth = password::Authenticator {

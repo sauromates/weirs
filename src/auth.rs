@@ -14,12 +14,24 @@ pub enum Flow {
     Saml,
 }
 
+#[derive(Debug)]
+pub enum ClientErrorKind {
+    MissingSecret,
+    Generic(String),
+}
+
+impl From<String> for ClientErrorKind {
+    fn from(s: String) -> Self {
+        ClientErrorKind::Generic(s)
+    }
+}
+
 /// Possible errors that can occur during authentication process.
 #[derive(Debug)]
 pub enum AuthError {
     /// Client errors represent anything that happened on VPN client side.
     /// This does not include HTTP errors received from server.
-    Client(String),
+    Client(ClientErrorKind),
     /// Server errors represent any HTTP error returned from the server.
     Server { status: u16, url: String },
     /// Network errors cover cases where server was unavailable or client network
