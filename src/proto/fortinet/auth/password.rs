@@ -127,7 +127,7 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn test_successful_auth() {
+    async fn successful_auth_returns_cookie() {
         let server = setup().await;
 
         Mock::given(method("GET"))
@@ -165,7 +165,7 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn test_server_error_on_logincheck() {
+    async fn failed_logincheck_is_server_error() {
         let server = setup().await;
 
         Mock::given(method("GET"))
@@ -198,7 +198,7 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn test_client_error_on_missing_cookie() {
+    async fn missing_cookie_is_client_error() {
         let server = setup().await;
 
         Mock::given(method("GET"))
@@ -231,7 +231,7 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn test_server_error_on_login() {
+    async fn failed_get_login_form_is_server_error() {
         let server = setup().await;
 
         Mock::given(method("GET"))

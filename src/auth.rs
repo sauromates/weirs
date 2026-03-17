@@ -60,7 +60,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_client_error_from_string_produces_generic_kind() {
+    fn client_error_from_string_produces_generic_kind() {
         let e = ClientErrorKind::from("some".to_string());
         assert!(matches!(e, ClientErrorKind::Generic(_)));
     }
