@@ -14,18 +14,6 @@ pub enum Flow {
     Saml,
 }
 
-#[derive(Debug)]
-pub enum ClientErrorKind {
-    MissingSecret,
-    Generic(String),
-}
-
-impl From<String> for ClientErrorKind {
-    fn from(s: String) -> Self {
-        ClientErrorKind::Generic(s)
-    }
-}
-
 /// Possible errors that can occur during authentication process.
 #[derive(Debug)]
 pub enum AuthError {
@@ -39,9 +27,21 @@ pub enum AuthError {
     Network(reqwest::Error),
 }
 
+#[derive(Debug)]
+pub enum ClientErrorKind {
+    MissingSecret,
+    Generic(String),
+}
+
 /// A string representing authentication token - usually a cookie.
 #[derive(Debug)]
 pub struct Token(pub String);
+
+impl From<String> for ClientErrorKind {
+    fn from(s: String) -> Self {
+        ClientErrorKind::Generic(s)
+    }
+}
 
 impl std::fmt::Display for AuthError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
@@ -54,3 +54,14 @@ impl std::fmt::Display for AuthError {
 }
 
 impl std::error::Error for AuthError {}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_client_error_from_string_produces_generic_kind() {
+        let e = ClientErrorKind::from("some".to_string());
+        assert!(matches!(e, ClientErrorKind::Generic(_)));
+    }
+}
