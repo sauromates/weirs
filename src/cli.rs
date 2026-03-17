@@ -17,11 +17,10 @@ pub enum Command {
 
 #[derive(Parser, Debug)]
 pub struct UpArgs {
-    #[arg(long)]
-    pub protocol: Option<Protocol>,
+    pub host: Option<String>,
 
     #[arg(long)]
-    pub host: Option<String>,
+    pub protocol: Option<Protocol>,
 
     #[arg(short, long)]
     pub username: Option<String>,
