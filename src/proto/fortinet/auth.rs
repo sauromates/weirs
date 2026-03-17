@@ -2,9 +2,13 @@
 //!
 //! Implements different authentication flows against FortiNet VPN servers.
 
-use crate::auth::{Auth, AuthError, ClientErrorKind, Flow, Token};
+use crate::{
+    Host,
+    auth::{Auth, AuthError, ClientErrorKind, Flow, Token},
+};
 use async_trait::async_trait;
 use reqwest::{Client, RequestBuilder, Response};
+use url::Url;
 
 pub mod password;
 
@@ -17,7 +21,7 @@ const COOKIE: &str = "SVPNCOOKIE";
 
 /// Fortinet-specific authenticator.
 pub struct FortinetAuth {
-    pub host: String,
+    pub host: Host,
 }
 
 impl Auth for FortinetAuth {
@@ -32,7 +36,7 @@ impl Auth for FortinetAuth {
             Flow::Password { username, password } => {
                 password::Authenticator {
                     client: &client,
-                    host: &self.host,
+                    host: &self.host.url,
                     username,
                     password,
                 }
@@ -72,7 +76,7 @@ pub trait StepHandler: Send {
 /// Makes first request to VPN server to initiate authentication flow.
 struct ProbeServer<'a> {
     client: &'a Client,
-    host: &'a str,
+    host: &'a Url,
 }
 
 #[async_trait]
@@ -82,7 +86,7 @@ impl StepHandler for ProbeServer<'_> {
         let _response = self.make_request(request, endpoint).await?;
 
         // TODO: implement response parsing for next URL
-        Ok(format!("{}{}", self.host, LOGIN_URL))
+        Ok(self.host.join(LOGIN_URL).unwrap().to_string())
     }
 }
 

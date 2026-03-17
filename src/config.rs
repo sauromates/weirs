@@ -1,17 +1,21 @@
-use std::path::PathBuf;
-
-use clap::ValueEnum;
-use serde::Deserialize;
+//! # Config
 
 use crate::cli::UpArgs;
+use clap::ValueEnum;
+use serde::Deserialize;
+use std::path::PathBuf;
 
+const DEFAULT_SAML_PORT: u16 = 8020;
+
+/// List of available protocols.
 #[derive(Clone, Debug, Deserialize, ValueEnum)]
 #[serde(rename_all = "lowercase")]
 pub enum Protocol {
     Fortinet,
 }
 
-#[derive(Debug, Deserialize)]
+/// Flat structure holding all available app configuration.
+#[derive(Debug, Deserialize, Clone)]
 pub struct Config {
     pub protocol: Option<Protocol>,
     pub host: Option<String>,
@@ -34,10 +38,15 @@ impl Config {
         toml::from_str(&config).map_err(|e| ConfigError::Parse(e.to_string()))
     }
 
+    pub fn from_args(args: UpArgs) -> Result<Self, ConfigError> {
+        let base = args.config.as_ref().map(Config::from_file).transpose()?;
+        Ok(Config::merge(base, args))
+    }
+
     pub fn merge(base: Option<Self>, args: UpArgs) -> Self {
         let saml_port = args
             .saml_login
-            .map(|port| port.unwrap_or(8020))
+            .map(|port| port.unwrap_or(DEFAULT_SAML_PORT))
             .or(base.as_ref().and_then(|b| b.saml_port));
 
         Self {
@@ -58,3 +67,14 @@ impl Config {
         }
     }
 }
+
+impl std::fmt::Display for ConfigError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            ConfigError::Io(e) => write!(f, "error reading config: {}", e),
+            ConfigError::Parse(e) => write!(f, "error parsing config: {}", e),
+        }
+    }
+}
+
+impl std::error::Error for ConfigError {}

@@ -1,14 +1,12 @@
-use std::path::PathBuf;
-
-use clap::{Parser, Subcommand};
-
 use crate::config::Protocol;
+use clap::{Parser, Subcommand};
+use std::path::PathBuf;
 
 #[derive(Parser)]
 #[command(name = "weirs", about = "A minimalist VPN client")]
 pub struct Cli {
     #[command(subcommand)]
-    pub cmd: Command,
+    pub command: Command,
 }
 
 #[derive(Subcommand)]
@@ -19,10 +17,10 @@ pub enum Command {
 
 #[derive(Parser, Debug)]
 pub struct UpArgs {
-    #[arg(short, long)]
+    #[arg(long)]
     pub protocol: Option<Protocol>,
 
-    #[arg(short, long)]
+    #[arg(long)]
     pub host: Option<String>,
 
     #[arg(short, long)]

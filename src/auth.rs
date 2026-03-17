@@ -42,3 +42,15 @@ pub enum AuthError {
 /// A string representing authentication token - usually a cookie.
 #[derive(Debug)]
 pub struct Token(pub String);
+
+impl std::fmt::Display for AuthError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            AuthError::Client(e) => write!(f, "Client error: {:?}", e),
+            AuthError::Server { status, url } => write!(f, "Server error {} at {}", status, url),
+            AuthError::Network(e) => write!(f, "Network error: {}", e),
+        }
+    }
+}
+
+impl std::error::Error for AuthError {}

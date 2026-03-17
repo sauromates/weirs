@@ -17,6 +17,7 @@ rpassword = "7.4.0"
 serde = { version = "1.0.228", features = ["derive"] }
 tokio = { version = "1.50.0", features = ["full"] }
 toml = "1.0.6"
+url = "2.5.8"
 
 [dev-dependencies]
 wiremock = "0.6.5"

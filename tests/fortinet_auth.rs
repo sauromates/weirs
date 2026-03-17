@@ -1,4 +1,5 @@
 use reqwest::Client;
+use url::Url;
 use weirs::{
     auth::{AuthError, ClientErrorKind},
     proto::fortinet::auth::password,
@@ -20,7 +21,7 @@ async fn test_fortinet_password_auth() {
 
     let auth = password::Authenticator {
         client: &client,
-        host: &host,
+        host: &Url::parse(host.as_str()).unwrap(),
         username,
         password,
     };
