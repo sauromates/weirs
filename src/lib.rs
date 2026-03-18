@@ -98,8 +98,51 @@ impl Host {
         self.ip = Some(ip);
         Ok(ip)
     }
+}
 
-    pub fn base_url(&self) -> &str {
-        self.url.as_str()
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use rstest::rstest;
+
+    #[rstest]
+    #[case::host_without_scheme("google.com", "https://google.com/")]
+    #[case::host_and_port_without_scheme("google.com:10443", "https://google.com:10443/")]
+    #[case::https_host("https://google.com", "https://google.com/")]
+    #[case::https_host_and_port("https://google.com:10443", "https://google.com:10443/")]
+    #[case::http_host("http://google.com", "http://google.com/")]
+    #[case::http_host_and_port("http://google.com:8080", "http://google.com:8080/")]
+    fn can_parse_string_into_host(#[case] input: &str, #[case] expected: &str) {
+        let host = Host::parse(input).unwrap();
+        assert_eq!(host.url.as_str(), expected);
+    }
+
+    #[rstest]
+    #[tokio::test]
+    #[case::valid_host("google.com", true)]
+    #[case::invalid_host("invalid.invalid", false)]
+    async fn host_can_resolve_ip(#[case] host: &str, #[case] should_resolve: bool) {
+        let mut host = Host::parse(host).unwrap();
+        let result = host.resolve().await;
+
+        if should_resolve {
+            assert!(result.is_ok());
+        } else {
+            assert!(result.is_err());
+        }
+    }
+
+    #[tokio::test]
+    async fn host_caches_resolved_ip() {
+        let mock_ip = IpAddr::from([1, 2, 3, 4]); // Definitely not Google IP
+        let mut host = Host {
+            url: Url::parse("https://google.com").unwrap(),
+            ip: Some(mock_ip),
+        };
+
+        let resolved = host.resolve().await.unwrap();
+
+        // If we receive mock IP then no DNS lookup was performed
+        assert_eq!(resolved, mock_ip);
     }
 }
