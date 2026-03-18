@@ -35,13 +35,20 @@ impl DriverFactory {
     }
 }
 
+/// A helper struct representing external host.
+///
+/// A `Host` without `ip` should be considered unresolved.
 #[derive(Clone)]
 pub struct Host {
-    url: Url,
+    pub url: Url,
     ip: Option<IpAddr>,
 }
 
 impl Host {
+    /// Parses a string into a Host.
+    ///
+    /// - NOTE: this function doesn't try to resolve the host.
+    /// - NOTE: a hostname without scheme would default to `https`.
     pub fn parse(hostname: &str) -> Result<Self, Box<dyn Error>> {
         let normalized = if hostname.starts_with("http://") || hostname.starts_with("https://") {
             hostname.to_string()
@@ -55,6 +62,18 @@ impl Host {
         })
     }
 
+    /// Plain getter for Host's IP.
+    ///
+    /// The `ip` field is not public and available only through getter
+    /// to ensure that Host can't have unrelated `url` and `ip`.
+    pub fn ip(&self) -> Option<IpAddr> {
+        self.ip
+    }
+
+    /// Resolves Host's name into an IP via `tokio::lookup_host`.
+    ///
+    /// Resolving also modifies Host to keep the result and avoid consecutive
+    /// DNS lookups.
     pub async fn resolve(&mut self) -> Result<IpAddr, Box<dyn Error>> {
         // Avoid extra lookups when IP is already resolved
         if let Some(ip) = self.ip {
